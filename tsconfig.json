@@ -1,0 +1,7 @@
+{
+  "compilerOptions": {
+    "outDir": "./built",
+    "rootDir": "D:/chris/programowanie/Utilities - TS excercise"
+  },
+  "include": ["./*"]
+}

@@ -1,0 +1,154 @@
+#show-dataset-borders {
+  display: none;
+  background: url(dataset_borders_icon.svg) no-repeat 0;
+  width: 60px;
+  height: 100%;
+  background-size: 40px;
+  background-position: 50%;
+  cursor: pointer;
+}
+  
+#ews-restore-seed-button {
+  background-image: url(regrow_seed_vf-20.svg);
+  background-size: 90%;
+  margin-top: 10px !important;
+}
+
+
+#ews-remove-duplicates-button {
+  background-image: url(remove_dupe-vf-21.svg);
+  background-size: 90%;
+  margin-top: 10px !important;
+}
+
+#ews-remove-undercolor-button {
+  background-image: url(neuroquest.png);
+  background-size: 100%;
+  margin-top: 10px !important;
+}
+
+#ews-additional-options-popup {
+  display: none;
+  position: absolute;
+  left: 100px;
+  top: 100px;
+  height: 300px;
+  width: 300px;
+}
+
+#ews-nav-bar-container {
+  list-style-type: none;
+}
+
+#ews-nav-bar-container li {
+  padding: 15px;
+  display: inline !important; /* to overwrite JS rule, which serves to avoid FOUC */
+  font-size: 14px;
+}
+
+#ews-nav-bar-container li:hover {
+  background-color: #2f7db3;
+}
+
+#ews-nav-bar-container li a {
+  color: #e4e1e1;
+  text-decoration: none;
+}
+
+#badgeListContainer {
+  height: 123px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+#badgeListContainer #badgeList {
+  width: 273px !important;
+  left: 0px !important;
+}
+
+.badgeArrow {
+  visibility: hidden !important;
+}
+
+#settingsMenu .ui-state-focus{
+  outline: none;
+}
+
+#settingsMenu .ui-accordion-header-active {
+  background-color: rgba(115,124,140,.28);
+}
+
+.ui-accordion .ui-accordion-content {
+  padding: 15px 0;
+}
+
+#ewSLbuttonsWrapper {
+  display: inline-block;
+  max-width: 115px;
+  line-height: 1;
+  margin-left: 0.5px; /* to fix a small gap between the second and the third column */
+  border-right-style: none;
+  border-right-color: #b5b730;
+  border-right-width: 2px;
+  padding-top: 1px;
+}
+
+#ewSLbuttonsWrapper > div > div {
+  display: inline-block;
+  border: 1px solid;
+  font-size: 10px;
+  padding: 2px;
+  width: 10px;
+  height: 10px;
+  text-align: center;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+#ewSLbuttonsWrapper > div {
+  max-width: 80px;
+  display: inline-block;
+  vertical-align: top;
+}
+
+#ewSLbuttonsWrapper > div > div:hover {
+  background-color: hsla(0,0%,100%,.11);
+}
+
+#ewSLcomplete_wrapper {
+  display: inline-block;
+  padding: 9px;
+}
+
+#ewSLnub {
+  color: #e6c760;
+}
+
+#ewSLbranch {
+  color: #e6c760;
+}
+
+#ewSLdust {
+  color: #e6c760;
+}
+
+#ewSLtestExtension {
+  color: #42d5ec;
+}
+
+#ewSLduplicate {
+  color: #d04f4f;
+}
+
+#ewSLmerger {
+  color: #d04f4f;
+}
+
+#ewSLAImerger {
+  color: #d04f4f;
+}
+
+#ewSLwrongSeedMerger {
+  color: #d04f4f;
+}
