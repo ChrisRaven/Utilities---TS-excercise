@@ -12,6 +12,33 @@
 /*jshint esversion: 2021 */
 /*globals $, account, tomni, THREE, scoutsLog, Cell, Utils */ 
 
+// Source: https://stackoverflow.com/a/51913929
+
+// import * as $ from './jquery.js';
+
+declare const account: any;
+declare const tomni: any;
+declare const THREE: any;
+declare const Cell: any;
+declare const scoutsLog: any;
+declare const Utils: any;
+declare const accordion: any;
+
+interface JQuery<TElement = HTMLElement> extends Iterable<TElement>{
+  accordion(...args: any): void;
+}
+
+interface JQueryStatic {
+  post(
+    url: string,
+    data: JQuery.PlainObject | string,
+    dataType: string
+  ): JQueryXHR
+}
+
+
+
+
 let LOCAL = false;
 if (LOCAL) {
   console.log('%c--== TURN OFF "LOCAL" BEFORE RELEASING!!! ==--', "color: red; font-style: italic; font-weight: bold;");
@@ -40,7 +67,7 @@ if (LOCAL) {
     },
 
     // Source: https://stackoverflow.com/a/6805461
-    injectJS: function (text, sURL) {
+    injectJS: function (text, sURL?) {
       let
         tgt,
         scriptNode = document.createElement('script');
@@ -147,7 +174,7 @@ if (LOCAL) {
       `);
       
       if (settings.indented) {
-        K.gid(settings.id).parentNode.parentNode.style.marginLeft = '30px';
+        (K.gid(settings.id).parentNode.parentNode as HTMLElement).style.marginLeft = '30px';
       }
       
       $(`#${settings.id}-wrapper`).click(function (evt) {
@@ -528,8 +555,8 @@ if (LOCAL) {
       clearInterval(intv0);
 
       if (state) {
-        K.gid('dataset-borders-show-origin').parentNode.parentNode.style.display = 'flex';
-        K.gid('dataset-borders-show-during-play').parentNode.parentNode.style.display = 'flex';
+        (K.gid('dataset-borders-show-origin').parentNode.parentNode as HTMLElement).style.display = 'flex';
+        (K.gid('dataset-borders-show-during-play').parentNode.parentNode as HTMLElement).style.display = 'flex';
         if (tomni && tomni.cell && buttonState) {
           addDatasetBorders();
           if (originVisibility) {
@@ -538,8 +565,8 @@ if (LOCAL) {
         }
       }
       else {
-        K.gid('dataset-borders-show-origin').parentNode.parentNode.style.display = 'none';
-        K.gid('dataset-borders-show-during-play').parentNode.parentNode.style.display = 'none';
+        (K.gid('dataset-borders-show-origin').parentNode.parentNode as HTMLElement).style.display = 'none';
+        (K.gid('dataset-borders-show-during-play').parentNode.parentNode as HTMLElement).style.display = 'none';
         if (tomni && tomni.cell) {
           removeDatasetBorders();
           removeDatasetOrigin();
@@ -657,7 +684,7 @@ if (LOCAL) {
     });
   }
 
-  function complete(id) {
+  function complete(id? : number) {
     let cube = tomni.getCurrentCell().getTarget();
 
     if (!cube && !id) {
@@ -887,7 +914,7 @@ if (LOCAL) {
   }
 
   // source: http://jsfiddle.net/User9673/J5d7h/
-  function makeTextSprite(text, params) {
+  function makeTextSprite(text) {
     let font = 'Arial';
     let size = 96;
     let textColor = [255, 255, 255, 1.0];
@@ -1102,8 +1129,8 @@ if (LOCAL) {
   
     // Place in top-left corner of screen regardless of scroll position.
     textArea.style.position = 'fixed';
-    textArea.style.top = 0;
-    textArea.style.left = 0;
+    textArea.style.top = '0';
+    textArea.style.left = '0';
   
     // Ensure it has a small width and height. Setting to 1px / 1em
     // doesn't work as this gives a negative w/h on some browsers.
@@ -1111,7 +1138,7 @@ if (LOCAL) {
     textArea.style.height = '2em';
   
     // We don't need padding, reducing the size if it does flash render.
-    textArea.style.padding = 0;
+    textArea.style.padding = '0';
   
     // Clean up any borders.
     textArea.style.border = 'none';
@@ -1223,7 +1250,7 @@ if (LOCAL) {
     }
     else if (e[2] || e[3]) {
       let r = Math.sqrt(e[2] * e[2] + e[3] * e[3]);
-      s = 0.5 * Math.pi - (e[3] > 0 ? Math.acos(-e[2] / r) : -Math.acos(e[2] / r));
+      s = 0.5 * Math.PI - (e[3] > 0 ? Math.acos(-e[2] / r) : -Math.acos(e[2] / r));
       n = {
         x: i / r,
         y: r
@@ -1321,7 +1348,7 @@ if (LOCAL) {
       tomni.twoD.render();
     }
     
-    let threeDCanvas = $('#threeDCanvas')[0];
+    let threeDCanvas = <HTMLCanvasElement>$('#threeDCanvas')[0];
     let scr = document.createElement('canvas');
     scr.height = threeDCanvas.height;
     scr.width = threeDCanvas.width;
@@ -1333,7 +1360,7 @@ if (LOCAL) {
     scrCtx.fillStyle = '#232323';
     scrCtx.fill();
 
-    let twoDCanvas = $('#twoD')[0];
+    let twoDCanvas = <HTMLCanvasElement>$('#twoD')[0];
     if (twoDCanvas && tomni.gameMode) {
     let twoDParent = $('#twoD').parent()[0],
       minX = Math.floor((threeDCanvas.width - twoDParent.clientWidth) / 2),
@@ -1432,7 +1459,8 @@ if (LOCAL) {
 
 // source: https://stackoverflow.com/a/30893294
 function switchReapMode(logAndReap) {
-  let reapButton = K.gid('saveGT');
+  let reapButton: { [key: string]: any } = K.gid('saveGT');
+
 
   if (logAndReap) {
     reapButton.removeEventListener('click', submitTask); // turn off submitting without the new popup
@@ -1442,11 +1470,11 @@ function switchReapMode(logAndReap) {
           $(reapButton).click(reapButton.clickFunctions[i]);
       }
       reapButton.clickFunctions = null;
-  }
+    }
   }
   else {
     reapButton.clickFunctions = [];
-    let click = $._data(reapButton, 'events').click;
+    let click = $.data(reapButton, 'events').click;
     for(let i = 0; i < click.length; i++) {
         reapButton.clickFunctions.push(click[i].handler);
     }
@@ -1817,8 +1845,8 @@ function compactInspectorPanel(compacted) {
 
       let windowWidth = $(window).width();
       let windowHeight = $(window).height();
-      let popupWidth = parseInt(popup.clientWidth, 10);
-      let popupHeight = parseInt(popup.clientHeight, 10);
+      let popupWidth = popup.clientWidth;
+      let popupHeight = popup.clientHeight;
 
       popup.style.left = (windowWidth / 2 - popupWidth / 2) + 'px';
       popup.style.top = (windowHeight / 2 - popupHeight / 2) + 'px';
@@ -1826,16 +1854,16 @@ function compactInspectorPanel(compacted) {
       popupStatus = 'opened';
     });
     
-    $(document).click(function (evt) {
-      if (evt.target.id !== 'ews-additional-options-popup' && popupStatus === 'opened') {
+    $(document).on('click', function (evt) {
+      if ((evt.target as unknown as HTMLElement).id !== 'ews-additional-options-popup' && popupStatus === 'opened') {
         K.gid('ews-additional-options-popup').style.display = 'none';
         popupStatus = 'closed';
       }
     });
 
     if (account.can('scout scythe mystic admin')) {
-      $(document).keyup(function (evt) {
-        if (evt.which !== 71) {
+      $(document).on('keyup', function (evt) {
+        if (evt.key !== 'g' && evt.key !== 'G') {
           return;
         }
 
@@ -1913,7 +1941,7 @@ function compactInspectorPanel(compacted) {
       });
 
       let trackerWindowSliderTitle = K.gid('activityTrackerWindowSlider').previousElementSibling;
-      trackerWindowSliderTitle.style.marginLeft = '30px';
+      (trackerWindowSliderTitle as HTMLElement).style.marginLeft = '30px';
       trackerWindowSliderTitle.innerHTML = 'Visible cubes';
 
       parent = trackerWindowSliderTitle.parentNode;

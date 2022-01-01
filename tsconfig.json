@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
-    "outDir": "./built",
-    "rootDir": "D:/chris/programowanie/Utilities - TS excercise"
+    "lib": ["dom", "es2021"],
+    "rootDir": "D:/chris/programowanie/Utilities - TS excercise",
+    "outDir": "./built"
   },
   "include": ["./*"]
 }

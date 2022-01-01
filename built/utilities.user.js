@@ -8,8 +8,6 @@
 // @exclude      https://*.eyewire.org/1.0/*
 // @downloadURL  https://raw.githubusercontent.com/ChrisRaven/EyeWire-Utilities/master/utilities.user.js
 // ==/UserScript==
-/*jshint esversion: 2021 */
-/*globals $, account, tomni, THREE, scoutsLog, Cell, Utils */
 let LOCAL = false;
 if (LOCAL) {
     console.log('%c--== TURN OFF "LOCAL" BEFORE RELEASING!!! ==--', "color: red; font-style: italic; font-weight: bold;");
@@ -736,7 +734,7 @@ if (LOCAL) {
         return 'rgba(' + arr.join(',') + ')';
     }
     // source: http://jsfiddle.net/User9673/J5d7h/
-    function makeTextSprite(text, params) {
+    function makeTextSprite(text) {
         let font = 'Arial';
         let size = 96;
         let textColor = [255, 255, 255, 1.0];
@@ -916,14 +914,14 @@ if (LOCAL) {
         //
         // Place in top-left corner of screen regardless of scroll position.
         textArea.style.position = 'fixed';
-        textArea.style.top = 0;
-        textArea.style.left = 0;
+        textArea.style.top = '0';
+        textArea.style.left = '0';
         // Ensure it has a small width and height. Setting to 1px / 1em
         // doesn't work as this gives a negative w/h on some browsers.
         textArea.style.width = '2em';
         textArea.style.height = '2em';
         // We don't need padding, reducing the size if it does flash render.
-        textArea.style.padding = 0;
+        textArea.style.padding = '0';
         // Clean up any borders.
         textArea.style.border = 'none';
         textArea.style.outline = 'none';
@@ -1010,7 +1008,7 @@ if (LOCAL) {
         }
         else if (e[2] || e[3]) {
             let r = Math.sqrt(e[2] * e[2] + e[3] * e[3]);
-            s = 0.5 * Math.pi - (e[3] > 0 ? Math.acos(-e[2] / r) : -Math.acos(e[2] / r));
+            s = 0.5 * Math.PI - (e[3] > 0 ? Math.acos(-e[2] / r) : -Math.acos(e[2] / r));
             n = {
                 x: i / r,
                 y: r
@@ -1199,7 +1197,7 @@ if (LOCAL) {
         }
         else {
             reapButton.clickFunctions = [];
-            let click = $._data(reapButton, 'events').click;
+            let click = $.data(reapButton, 'events').click;
             for (let i = 0; i < click.length; i++) {
                 reapButton.clickFunctions.push(click[i].handler);
             }
@@ -1527,21 +1525,21 @@ if (LOCAL) {
             popup.style.display = 'block';
             let windowWidth = $(window).width();
             let windowHeight = $(window).height();
-            let popupWidth = parseInt(popup.clientWidth, 10);
-            let popupHeight = parseInt(popup.clientHeight, 10);
+            let popupWidth = popup.clientWidth;
+            let popupHeight = popup.clientHeight;
             popup.style.left = (windowWidth / 2 - popupWidth / 2) + 'px';
             popup.style.top = (windowHeight / 2 - popupHeight / 2) + 'px';
             popupStatus = 'opened';
         });
-        $(document).click(function (evt) {
+        $(document).on('click', function (evt) {
             if (evt.target.id !== 'ews-additional-options-popup' && popupStatus === 'opened') {
                 K.gid('ews-additional-options-popup').style.display = 'none';
                 popupStatus = 'closed';
             }
         });
         if (account.can('scout scythe mystic admin')) {
-            $(document).keyup(function (evt) {
-                if (evt.which !== 71) {
+            $(document).on('keyup', function (evt) {
+                if (evt.key !== 'g' && evt.key !== 'G') {
                     return;
                 }
                 if (settings.getValue('go-in-and-out-of-cube-using-g')) {
