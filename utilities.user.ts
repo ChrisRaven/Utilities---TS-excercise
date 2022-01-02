@@ -28,15 +28,13 @@ interface JQuery<TElement = HTMLElement> extends Iterable<TElement>{
   accordion(...args: any): void;
 }
 
-interface JQueryStatic {
-  post(
-    url: string,
-    data: JQuery.PlainObject | string,
-    dataType: string
-  ): JQueryXHR
-}
-
-
+// interface JQueryStatic {
+//   post(
+//     url: string,
+//     data: JQuery.PlainObject | string,
+//     dataType: string
+//   ): JQueryXHR
+// }
 
 
 let LOCAL = false;
@@ -49,27 +47,27 @@ if (LOCAL) {
   'esversion: 6';
 
   let K = {
-    gid: function (id) {
+    gid: function (id: string): HTMLElement {
       return document.getElementById(id);
     },
     
-    qS: function (sel) {
+    qS: function (sel: string): HTMLElement {
       return document.querySelector(sel);
     },
     
-    qSa: function (sel) {
+    qSa: function (sel: string): NodeListOf<HTMLElement> {
       return document.querySelectorAll(sel);
     },
 
 
-    addCSSFile: function (path) {
+    addCSSFile: function (path: string): void {
       $("head").append('<link href="' + path + '" rel="stylesheet" type="text/css">');
     },
 
     // Source: https://stackoverflow.com/a/6805461
-    injectJS: function (text, sURL?) {
+    injectJS: function (text: string, sURL?: string): void {
       let
-        tgt,
+        tgt: HTMLElement,
         scriptNode = document.createElement('script');
 
       scriptNode.type = "text/javascript";
@@ -84,16 +82,15 @@ if (LOCAL) {
       tgt.appendChild(scriptNode);
     },
 
-    injectCSS: function (rules) {
+    injectCSS: function (rules: string): void {
       let script = document.createElement('style');
-      script.type = 'text/css';
       script.innerHTML = rules;
       let parent = document.body;
       parent.insertBefore(script, parent.childNodes[parent.childNodes.length]);
     },
 
     // source: https://stackoverflow.com/a/1349426
-    randomString: function () {
+    randomString: function (): string {
       let text = '';
       let possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     
@@ -105,33 +102,33 @@ if (LOCAL) {
     
     // localStorage
     ls: {
-      get: function (key) {
+      get: function (key: string): string {
         return localStorage.getItem(account.account.uid + '-ews-' + key);
       },
 
-      set: function (key, val) {
-        localStorage.setItem(account.account.uid + '-ews-' + key, val);
+      set: function (key: string, val: string | boolean): void {
+        localStorage.setItem(account.account.uid + '-ews-' + key, val.toString());
       },
 
-      remove: function (key) {
+      remove: function (key: string) {
         localStorage.removeItem(account.account.uid + '-ews-' + key);
       }
     }
   };
 
 
-  function Settings() {
-    let target;
-    
-    this.setTarget = function (selector) {
+  function Settings(): void {
+    let target: JQuery;
+
+    this.setTarget = function (selector: JQuery): void {
       target = selector;
     };
     
-    this.getTarget = function () {
+    this.getTarget = function (): JQuery {
       return target;
     };
     
-    this.addCategory = function (id = 'ews-utilities-settings-group', name = 'Utilities', mainTarget = 'settingsMenu') {
+    this.addCategory = function (id = 'ews-utilities-settings-group', name = 'Utilities', mainTarget = 'settingsMenu'): void {
       if (!K.gid(id)) {
         $('#' + mainTarget).append(`
           <div id="${id}" class="settings-group ews-settings-group invisible">
@@ -143,7 +140,7 @@ if (LOCAL) {
       this.setTarget($('#' + id));
     };
 
-    this.addOption = function (options) {
+    this.addOption = function (options: {}): void {
       let settings = {
         name: '',
         id: '',
@@ -153,7 +150,7 @@ if (LOCAL) {
 
       $.extend(settings, options);
       let storedState = K.ls.get(settings.id);
-      let state;
+      let state: boolean;
 
       if (storedState === null) {
         K.ls.set(settings.id, settings.defaultState);
@@ -177,7 +174,7 @@ if (LOCAL) {
         (K.gid(settings.id).parentNode.parentNode as HTMLElement).style.marginLeft = '30px';
       }
       
-      $(`#${settings.id}-wrapper`).click(function (evt) {
+      $(`#${settings.id}-wrapper`).on('click', function (evt) {
         evt.stopPropagation();
 
         let $elem = $(this).find('input');
@@ -211,7 +208,7 @@ if (LOCAL) {
     };
   }
 
-  function moveToTopBar(text) {
+  function moveToTopBar(text: string): void {
     let el = $("#links a:contains('" + text + "')").parent();
     el.css('display', 'none');
 
@@ -227,7 +224,7 @@ if (LOCAL) {
     }
   }
 
-  function moveToLinks(text) {
+  function moveToLinks(text: string): void {
     let el = $("#ews-nav-bar-container a:contains('" + text + "')").parent();
 
     if (el.length) {
@@ -237,7 +234,7 @@ if (LOCAL) {
   }
 
   // Top Buttons Hiding
-  function showOrHideButton(pref, state) {
+  function showOrHideButton(pref: string, state: boolean): void {
     let text = '';
     switch (pref) {
       case "hide-blog": text = 'Blog'; break;
@@ -261,7 +258,7 @@ if (LOCAL) {
 
 
   // Compact Scouts' Log
-  function changeHtml(selector, text) {
+  function changeHtml(selector: string, text: string): void {
     let el = K.qS(selector);
     if (el) {
       el.childNodes[0].nodeValue = text;
@@ -269,7 +266,7 @@ if (LOCAL) {
   }
 
 
-  function compactOrExpandScoutsLog(state) {
+  function compactOrExpandScoutsLog(state: boolean): void {
     if (!K.gid('scoutsLogFloatingControls')) {
       return;
     }
@@ -352,7 +349,7 @@ if (LOCAL) {
       'margin-top': 'auto',
       'margin-left': '315px'
     })
-    .click(function () {
+    .on('click', function () {
       tomni.f('select', {segids: tomni.task.seeds()});
     });
 
@@ -364,7 +361,7 @@ if (LOCAL) {
       'margin-top': 'auto',
       'margin-left': '270px'
     })
-    .click(function () {
+    .on('click', function () {
       let dupes = tomni.task.duplicates;
       let dupeSegs = [];
 
@@ -387,7 +384,7 @@ if (LOCAL) {
       'margin-top': 'auto',
       'margin-left': '175px'
     })
-    .click(function () {
+    .on('click', function () {
       if (tomni.task.reviewReq.responseJSON) {
         let undercolor = tomni.task.reviewReq.responseJSON.undercolor;
         if (undercolor && undercolor[0]) {
@@ -395,7 +392,7 @@ if (LOCAL) {
         }
       }
     })
-    .contextmenu(function (event) {
+    .on('contextmenu', function (event) {
       event.preventDefault();
       event.stopPropagation();
 
@@ -413,14 +410,14 @@ if (LOCAL) {
     });
 
 
-  function setReapAuxButtonVisibility(id, state) {
+  function setReapAuxButtonVisibility(id: string, state: boolean): void {
     K.gid(id).style.visibility = state ? 'visible' : 'hidden';
   }
   // END: Remove Duplicate Segments and Regrow Seed buttons
 
 
   // Datasets' Borders
-  function toggleDatasetBordersVisibility() {
+  function toggleDatasetBordersVisibility(): void {
     let buttonState = K.ls.get('show-dataset-borders-state') === 'true';
     let showBorders = settings.getValue('show-dataset-borders-button');
     let showOrigin = settings.getValue('dataset-borders-show-origin');
@@ -444,7 +441,16 @@ if (LOCAL) {
     }
   }
 
-  function createDatasetBordersCube(coords, filled = false) {
+  interface Coords {
+    minX: number,
+    minY: number,
+    minZ: number,
+    maxX: number,
+    maxY: number,
+    maxZ: number
+  }
+
+  function createDatasetBordersCube(coords: Coords, filled = false) {
     let lengthX = coords.maxX - coords.minX;
     let lengthY = coords.maxY - coords.minY;
     let lengthZ = coords.maxZ - coords.minZ;
@@ -493,7 +499,7 @@ if (LOCAL) {
     maxX: 68800 + 2560, maxY: 59840 + 2560, maxZ: 737640 + 2560
   }, true);
 
-  function addDatasetBorders() {
+  function addDatasetBorders(): void {
     let dataset = (tomni && tomni.cell) ? tomni.getCurrentCell().info.dataset_id : 1;
     let world = tomni.threeD.getWorld();
 
@@ -509,7 +515,7 @@ if (LOCAL) {
     tomni.threeD.render();
   }
 
-  function removeDatasetBorders() {
+  function removeDatasetBorders(): void {
     let world = tomni.threeD.getWorld();
 
     world.remove(datasetBordersE2198Cube);
@@ -518,7 +524,7 @@ if (LOCAL) {
     tomni.threeD.render();
   }
 
-  function addDatasetOrigin() {
+  function addDatasetOrigin(): void {
     let dataset = (tomni && tomni.cell) ? tomni.getCurrentCell().info.dataset_id : 1;
     let world = tomni.threeD.getWorld();
 
@@ -534,7 +540,7 @@ if (LOCAL) {
     tomni.threeD.render();
   }
 
-  function removeDatasetOrigin() {
+  function removeDatasetOrigin(): void {
     let world = tomni.threeD.getWorld();
 
     world.remove(datasetBordersE2198OriginCube);
@@ -543,7 +549,7 @@ if (LOCAL) {
     tomni.threeD.render();
   }
 
-  function setDatasetBorderButtonAndOptionsVisibility(state) {
+  function setDatasetBorderButtonAndOptionsVisibility(state: boolean): void {
     let buttonState = K.ls.get('show-dataset-borders-state') === null ? true : K.ls.get('show-dataset-borders-state') === 'true';
     let originVisibility = settings.getValue('dataset-borders-show-origin');
 
@@ -584,7 +590,7 @@ if (LOCAL) {
     }, 100);
   }
 
-  function setDatasetOriginVisibility(state) {
+  function setDatasetOriginVisibility(state: boolean): void {
     let buttonState = K.ls.get('show-dataset-borders-state') === null ? true : K.ls.get('show-dataset-borders-state') === 'true';
     let buttonVisibility = settings.getValue('show-dataset-borders-button');
 
@@ -649,13 +655,8 @@ if (LOCAL) {
     });
     
       // stop leaking of shortcuts from SL
-    $('#slPanel').on('keyup', '#sl-action-notes', function (evt) {//console.log(evt.which)
-      if ([71, 84, 48, 49, 50, 51, 52, 53, 54].includes(evt.which)) {
-        /*
-          71 = g, G - go in and out of cube using "G"
-          84 = t, T - custom highlight color change
-          48 .. 54 = 0 .. 6 - heatmaps changing
-        */
+    $('#slPanel').on('keyup', '#sl-action-notes', function (evt) {
+      if (['g', 'G', 't', 'T', '0', '1', '2', '3', '4', '5', '6'].includes(evt.key)) {
         evt.stopPropagation();
       }
     });
@@ -663,7 +664,7 @@ if (LOCAL) {
   }, 100);
 
 
-  function submitTask() {
+  function submitTask(): void {
     // simulate clicking on the Reap button
     K.qS('#editActions .reaperButton').style.backgroundColor = '#6785c5';
 
@@ -684,7 +685,7 @@ if (LOCAL) {
     });
   }
 
-  function complete(id? : number) {
+  function complete(id? : number): void {
     let cube = tomni.getCurrentCell().getTarget();
 
     if (!cube && !id) {
@@ -707,7 +708,7 @@ if (LOCAL) {
   
   let cubeStatus;
 
-  function createAdditionalSLButtons() {
+  function createAdditionalSLButtons(): void {
     let html = `
     <div>
       <div id="ewSLduplicate" title="Duplicate">D</div>
@@ -877,8 +878,8 @@ if (LOCAL) {
   // END:  autorefresh show-me-me
 
   // submit using Spacebar
-  $('body').keydown(function (evt) {
-    let btn;
+  $('body').on('keydown', function (evt) {
+    let btn: HTMLElement;
     let submit = settings.getValue('submit-using-spacebar');
     let turnOffZoom = settings.getValue('turn-off-zoom-by-spacebar');
 
@@ -909,12 +910,12 @@ if (LOCAL) {
   // END: submit using Spacebar
 
 
-  function arrayOfColorsToRGBa(arr) {
+  function arrayOfColorsToRGBa(arr: Array<number>): string {
     return 'rgba(' + arr.join(',') + ')';
   }
 
   // source: http://jsfiddle.net/User9673/J5d7h/
-  function makeTextSprite(text) {
+  function makeTextSprite(text: string) {
     let font = 'Arial';
     let size = 96;
     let textColor = [255, 255, 255, 1.0];
@@ -965,7 +966,7 @@ if (LOCAL) {
     return mesh;
 }
 
-  function addText(text, x, y, z) {
+  function addText(text: string, x: number, y: number, z: number) {
     let sprite = makeTextSprite(text);
     sprite.position.set(x, y, z);
     return sprite;
@@ -1066,7 +1067,7 @@ if (LOCAL) {
   let raycaster = new THREE.Raycaster();
   let camera = tomni.threeD.getCamera();
 
-  let getMousePosition = function (dom, x, y) {
+  let getMousePosition = function (dom: HTMLElement, x: number, y: number): Array<number> {
     let rect = dom.getBoundingClientRect();
     return [(x - rect.left) / rect.width, (y - rect.top) / rect.height];
   };
@@ -1109,7 +1110,7 @@ if (LOCAL) {
 
 
   // source: https://stackoverflow.com/a/30810322
-  function copyTextToClipboard(text) {
+  function copyTextToClipboard(text: string) {
     let textArea = document.createElement("textarea");
   
     //
@@ -1160,7 +1161,7 @@ if (LOCAL) {
     document.body.removeChild(textArea);
   }
 
-  $(document).click(function (event) {
+  $(document).on('click', function (event) {
     if (!settings || !settings.getValue('show-childrens-ids')) {
       return;
     }
@@ -1188,7 +1189,7 @@ if (LOCAL) {
   });
 
 
-  $('#showChildren').click(function () {
+  $('#showChildren').on('click', function () {
     if (!settings.getValue('show-childrens-ids')) {
       return;
     }
@@ -1203,7 +1204,7 @@ if (LOCAL) {
   });
 
 
-  function moveFreeToTheLeftOfHighlight(state) {
+  function moveFreeToTheLeftOfHighlight(state: boolean): void {
     if (state) {
       $('#cubeInspectorFloatingControls .controls').prepend($('.control.freeze'));
     }
@@ -1213,7 +1214,7 @@ if (LOCAL) {
   }
   
   
-  function switchSLButtons(state) {
+  function switchSLButtons(state: boolean): void {
     if (state) {
       $('#settingsButton').before($('#scoutsLogButton'));
     }
@@ -1222,8 +1223,8 @@ if (LOCAL) {
     }
   }
 
-  function parseTransform(t) {
-    let e = t.match(/([0-9\.]+)/g),
+  function parseTransform(t: string) {
+    let e: Array<any> = t.match(/([0-9\.]+)/g),
       a = {
         x: e[4],
         y: e[5]
@@ -1273,7 +1274,7 @@ if (LOCAL) {
   }
 
   // source: omni.js
-  function fileRequest(url, data, file, callback) {
+  function fileRequest(url: string, data: object, file: object, callback: (response?: {}) => {} | void): void {
     let form = new FormData();
     if (data) {
       for (let i in data) {
@@ -1335,7 +1336,7 @@ if (LOCAL) {
     request.send(form);
   }
 
-  function captureImage() {
+  function captureImage(): void {
     let cellId = tomni.getCurrentCell().id;
     let taskId = tomni.getTarget()[0].id;
     let userName = account.account.username;
@@ -1458,7 +1459,7 @@ if (LOCAL) {
 }
 
 // source: https://stackoverflow.com/a/30893294
-function switchReapMode(logAndReap) {
+function switchReapMode(logAndReap: boolean): void {
   let reapButton: { [key: string]: any } = K.gid('saveGT');
 
 
@@ -1484,7 +1485,7 @@ function switchReapMode(logAndReap) {
   }
 }
 
-function compactInspectorPanel(compacted) {
+function compactInspectorPanel(compacted: boolean): void {
   if (compacted) {
     $('#cubeInspectorFloatingControls .controls .control').css('width', 'auto');
     $('#cubeInspectorFloatingControls .controls .control>button, #cubeInspectorFloatingControls .controls .control>div').css({
@@ -1839,7 +1840,7 @@ function compactInspectorPanel(compacted) {
     
     let popupStatus = 'closed';
     
-    $('#ews-additional-options').click(function () {
+    $('#ews-additional-options').on('click', function () {
       let popup = K.gid('ews-additional-options-popup');
       popup.style.display = 'block';
 
@@ -1905,7 +1906,7 @@ function compactInspectorPanel(compacted) {
   });
 
 
-  $('#settingsButton').click(function () {
+  $('#settingsButton').on('click', function () {
     $('#settingsMenu')
       .addClass('more')
       .trigger('resize');
@@ -1944,7 +1945,7 @@ function compactInspectorPanel(compacted) {
       (trackerWindowSliderTitle as HTMLElement).style.marginLeft = '30px';
       trackerWindowSliderTitle.innerHTML = 'Visible cubes';
 
-      parent = trackerWindowSliderTitle.parentNode;
+      parent = trackerWindowSliderTitle.parentNode as HTMLElement;
       parent.style.display = 'block';
 
       let newTitle = document.createElement('div');
@@ -2105,7 +2106,7 @@ function compactInspectorPanel(compacted) {
   let isZKeyPressed = false;
 
   $(document)
-    .keydown(function (e) {
+    .on('keydown', function (e) {
       if (!tomni.task || !tomni.task.inspect) {
         return;
       }
@@ -2117,7 +2118,7 @@ function compactInspectorPanel(compacted) {
         }
       }
     })
-    .keyup(function (e) {
+    .on('keyup', function (e) {
       if (!tomni.task || !tomni.task.inspect) {
         return;
       }
@@ -2138,7 +2139,7 @@ function compactInspectorPanel(compacted) {
     4: 100
   };
 
-  $('#threeDCanvas').contextmenu(function (e) {
+  $('#threeDCanvas').on('contextmenu', function (e) {
     if (!tomni.task || !tomni.task.inspect) {
       return;
     }

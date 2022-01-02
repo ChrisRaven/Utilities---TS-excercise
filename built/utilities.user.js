@@ -8,6 +8,13 @@
 // @exclude      https://*.eyewire.org/1.0/*
 // @downloadURL  https://raw.githubusercontent.com/ChrisRaven/EyeWire-Utilities/master/utilities.user.js
 // ==/UserScript==
+// interface JQueryStatic {
+//   post(
+//     url: string,
+//     data: JQuery.PlainObject | string,
+//     dataType: string
+//   ): JQueryXHR
+// }
 let LOCAL = false;
 if (LOCAL) {
     console.log('%c--== TURN OFF "LOCAL" BEFORE RELEASING!!! ==--', "color: red; font-style: italic; font-weight: bold;");
@@ -43,7 +50,6 @@ if (LOCAL) {
         },
         injectCSS: function (rules) {
             let script = document.createElement('style');
-            script.type = 'text/css';
             script.innerHTML = rules;
             let parent = document.body;
             parent.insertBefore(script, parent.childNodes[parent.childNodes.length]);
@@ -62,7 +68,7 @@ if (LOCAL) {
                 return localStorage.getItem(account.account.uid + '-ews-' + key);
             },
             set: function (key, val) {
-                localStorage.setItem(account.account.uid + '-ews-' + key, val);
+                localStorage.setItem(account.account.uid + '-ews-' + key, val.toString());
             },
             remove: function (key) {
                 localStorage.removeItem(account.account.uid + '-ews-' + key);
@@ -116,7 +122,7 @@ if (LOCAL) {
             if (settings.indented) {
                 K.gid(settings.id).parentNode.parentNode.style.marginLeft = '30px';
             }
-            $(`#${settings.id}-wrapper`).click(function (evt) {
+            $(`#${settings.id}-wrapper`).on('click', function (evt) {
                 evt.stopPropagation();
                 let $elem = $(this).find('input');
                 let elem = $elem[0];
@@ -279,7 +285,7 @@ if (LOCAL) {
         'margin-top': 'auto',
         'margin-left': '315px'
     })
-        .click(function () {
+        .on('click', function () {
         tomni.f('select', { segids: tomni.task.seeds() });
     });
     $('#ews-remove-duplicates-button')
@@ -290,7 +296,7 @@ if (LOCAL) {
         'margin-top': 'auto',
         'margin-left': '270px'
     })
-        .click(function () {
+        .on('click', function () {
         let dupes = tomni.task.duplicates;
         let dupeSegs = [];
         if (dupes && dupes[0]) {
@@ -310,7 +316,7 @@ if (LOCAL) {
         'margin-top': 'auto',
         'margin-left': '175px'
     })
-        .click(function () {
+        .on('click', function () {
         if (tomni.task.reviewReq.responseJSON) {
             let undercolor = tomni.task.reviewReq.responseJSON.undercolor;
             if (undercolor && undercolor[0]) {
@@ -318,7 +324,7 @@ if (LOCAL) {
             }
         }
     })
-        .contextmenu(function (event) {
+        .on('contextmenu', function (event) {
         event.preventDefault();
         event.stopPropagation();
         if (tomni.task.segments) {
@@ -520,12 +526,7 @@ if (LOCAL) {
         });
         // stop leaking of shortcuts from SL
         $('#slPanel').on('keyup', '#sl-action-notes', function (evt) {
-            if ([71, 84, 48, 49, 50, 51, 52, 53, 54].includes(evt.which)) {
-                /*
-                  71 = g, G - go in and out of cube using "G"
-                  84 = t, T - custom highlight color change
-                  48 .. 54 = 0 .. 6 - heatmaps changing
-                */
+            if (['g', 'G', 't', 'T', '0', '1', '2', '3', '4', '5', '6'].includes(evt.key)) {
                 evt.stopPropagation();
             }
         });
@@ -704,7 +705,7 @@ if (LOCAL) {
     });
     // END:  autorefresh show-me-me
     // submit using Spacebar
-    $('body').keydown(function (evt) {
+    $('body').on('keydown', function (evt) {
         let btn;
         let submit = settings.getValue('submit-using-spacebar');
         let turnOffZoom = settings.getValue('turn-off-zoom-by-spacebar');
@@ -935,7 +936,7 @@ if (LOCAL) {
         document.execCommand('copy');
         document.body.removeChild(textArea);
     }
-    $(document).click(function (event) {
+    $(document).on('click', function (event) {
         if (!settings || !settings.getValue('show-childrens-ids')) {
             return;
         }
@@ -958,7 +959,7 @@ if (LOCAL) {
     $(document).on('cube-enter-triggered.utilities cube-leave-triggered.utilities', function () {
         hideNeighboursIDs();
     });
-    $('#showChildren').click(function () {
+    $('#showChildren').on('click', function () {
         if (!settings.getValue('show-childrens-ids')) {
             return;
         }
@@ -1520,7 +1521,7 @@ if (LOCAL) {
             });
         }
         let popupStatus = 'closed';
-        $('#ews-additional-options').click(function () {
+        $('#ews-additional-options').on('click', function () {
             let popup = K.gid('ews-additional-options-popup');
             popup.style.display = 'block';
             let windowWidth = $(window).width();
@@ -1572,7 +1573,7 @@ if (LOCAL) {
             complete(data.task_id);
         }
     });
-    $('#settingsButton').click(function () {
+    $('#settingsButton').on('click', function () {
         $('#settingsMenu')
             .addClass('more')
             .trigger('resize');
@@ -1728,7 +1729,7 @@ if (LOCAL) {
     $(document).on('cube-leave-triggered.utilities', restore);
     let isZKeyPressed = false;
     $(document)
-        .keydown(function (e) {
+        .on('keydown', function (e) {
         if (!tomni.task || !tomni.task.inspect) {
             return;
         }
@@ -1739,7 +1740,7 @@ if (LOCAL) {
             }
         }
     })
-        .keyup(function (e) {
+        .on('keyup', function (e) {
         if (!tomni.task || !tomni.task.inspect) {
             return;
         }
@@ -1757,7 +1758,7 @@ if (LOCAL) {
         3: 50,
         4: 100
     };
-    $('#threeDCanvas').contextmenu(function (e) {
+    $('#threeDCanvas').on('contextmenu', function (e) {
         if (!tomni.task || !tomni.task.inspect) {
             return;
         }
