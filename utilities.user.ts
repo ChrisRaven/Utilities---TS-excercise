@@ -47,11 +47,11 @@ if (LOCAL) {
   'esversion: 6';
 
   let K = {
-    gid: function (id: string): HTMLElement {
+    gid: function (id: string): HTMLElement | null {
       return document.getElementById(id);
     },
     
-    qS: function (sel: string): HTMLElement {
+    qS: function (sel: string): HTMLElement | null {
       return document.querySelector(sel);
     },
     
@@ -102,7 +102,7 @@ if (LOCAL) {
     
     // localStorage
     ls: {
-      get: function (key: string): string {
+      get: function (key: string): string | null {
         return localStorage.getItem(account.account.uid + '-ews-' + key);
       },
 
@@ -117,7 +117,16 @@ if (LOCAL) {
   };
 
 
-  function Settings(): void {
+  interface Settings {
+    setTarget(selector: JQuery): void,
+    getTarget(): JQuery,
+    addCategory(id?: string, name?: string, mainTarget?: string): void,
+    addOption(options: {}): void,
+    getValue(optionId: string): boolean | string | undefined,
+    new(): Settings
+  }
+
+  function Settings(this: Settings): void {
     let target: JQuery;
 
     this.setTarget = function (selector: JQuery): void {
@@ -171,13 +180,13 @@ if (LOCAL) {
       `);
       
       if (settings.indented) {
-        (K.gid(settings.id).parentNode.parentNode as HTMLElement).style.marginLeft = '30px';
+        (K.gid(settings.id)!.parentNode!.parentNode as HTMLElement).style.marginLeft = '30px';
       }
       
-      $(`#${settings.id}-wrapper`).on('click', function (evt) {
+      $(`#${settings.id}-wrapper`).on('click', function (evt: JQuery.ClickEvent) {
         evt.stopPropagation();
 
-        let $elem = $(this).find('input');
+        let $elem = $(evt.target).find('input');
         let elem = $elem[0];
         let newState = !elem.checked;
 
@@ -191,7 +200,7 @@ if (LOCAL) {
       $(document).trigger('ews-setting-changed', {setting: settings.id, state: state});
     };
     
-    this.getValue = function (optionId) {
+    this.getValue = function (optionId: string): boolean | string | undefined {
       let val = K.ls.get(optionId);
       
       if (val === null) {
@@ -272,14 +281,14 @@ if (LOCAL) {
     }
 
     if (state) {
-      K.gid('scoutsLogFloatingControls').style.width = 'auto';
-      K.gid('scoutsLogFloatingControls').style.padding = '1px 2px 2px 2px';
+      K.gid('scoutsLogFloatingControls')!.style.width = 'auto';
+      K.gid('scoutsLogFloatingControls')!.style.padding = '1px 2px 2px 2px';
       $('#scoutsLogFloatingControls a').css({
         'margin-right': 0,
         'vertical-align': 'top',
         'width': '15px'
       });
-      K.gid('sl-capture-image').style.width = '34px';
+      K.gid('sl-capture-image')!.style.width = '34px';
       $('#scoutsLogFloatingControls a span').css({
         'background-color': '#000',
         'padding': 0
@@ -293,11 +302,11 @@ if (LOCAL) {
       changeHtml('.sl-history', 'H');
       changeHtml('#sl-task-details', 'D');
       changeHtml('#sl-task-entry', 'N');
-      K.qS('#scoutsLogFloatingControls img').style.display = 'none';
+      K.qS('#scoutsLogFloatingControls img')!.style.display = 'none';
     }
     else {
-      K.gid('scoutsLogFloatingControls').style.width = '';
-      K.gid('scoutsLogFloatingControls').style.padding = '8px';
+      K.gid('scoutsLogFloatingControls')!.style.width = '';
+      K.gid('scoutsLogFloatingControls')!.style.padding = '8px';
       $('#scoutsLogFloatingControls a').css({
         'margin-right': '8px',
         'vertical-align': 'top',
@@ -307,7 +316,7 @@ if (LOCAL) {
         'background-color': '#7a8288',
         'padding': '3px 7px'
       });
-      if (!K.gid('scoutsLogFloatingControls').classList.contains('sl-vertical')) {
+      if (!K.gid('scoutsLogFloatingControls')!.classList.contains('sl-vertical')) {
       changeHtml('.sl-cell-list', 'Cell List');
       changeHtml('.sl-mystic', 'Mystic ');
       changeHtml('.sl-open', 'Open Logs ');
@@ -329,8 +338,8 @@ if (LOCAL) {
         changeHtml('#sl-task-details', 'D ');
         changeHtml('#sl-task-entry', 'N');
       }
-      K.qS('#scoutsLogFloatingControls img').style.display = '';
-      K.gid('sl-task-entry').style.width = '24px';
+      K.qS('#scoutsLogFloatingControls img')!.style.display = '';
+      K.gid('sl-task-entry')!.style.width = '24px';
     }
   }
   // END: Compact Scouts' Log
@@ -363,7 +372,7 @@ if (LOCAL) {
     })
     .on('click', function () {
       let dupes = tomni.task.duplicates;
-      let dupeSegs = [];
+      let dupeSegs: string[] = [];
 
       if (dupes && dupes[0]) {
         for (let i = 0; i < dupes.length; i++) {
@@ -392,7 +401,7 @@ if (LOCAL) {
         }
       }
     })
-    .on('contextmenu', function (event) {
+    .on('contextmenu', function (event: JQuery.ContextMenuEvent) {
       event.preventDefault();
       event.stopPropagation();
 
@@ -400,7 +409,7 @@ if (LOCAL) {
         let lowConfidenceSegs = [];
 
         for (const [key, value] of Object.entries(tomni.task.segments)) {
-          if (value <= 0.5) {
+          if (<number>value <= 0.5) {
             lowConfidenceSegs.push(key);
           }
         }
@@ -411,7 +420,7 @@ if (LOCAL) {
 
 
   function setReapAuxButtonVisibility(id: string, state: boolean): void {
-    K.gid(id).style.visibility = state ? 'visible' : 'hidden';
+    K.gid(id)!.style.visibility = state ? 'visible' : 'hidden';
   }
   // END: Remove Duplicate Segments and Regrow Seed buttons
 
@@ -561,8 +570,8 @@ if (LOCAL) {
       clearInterval(intv0);
 
       if (state) {
-        (K.gid('dataset-borders-show-origin').parentNode.parentNode as HTMLElement).style.display = 'flex';
-        (K.gid('dataset-borders-show-during-play').parentNode.parentNode as HTMLElement).style.display = 'flex';
+        (K.gid('dataset-borders-show-origin')!.parentNode!.parentNode as HTMLElement).style.display = 'flex';
+        (K.gid('dataset-borders-show-during-play')!.parentNode!.parentNode as HTMLElement).style.display = 'flex';
         if (tomni && tomni.cell && buttonState) {
           addDatasetBorders();
           if (originVisibility) {
@@ -571,8 +580,8 @@ if (LOCAL) {
         }
       }
       else {
-        (K.gid('dataset-borders-show-origin').parentNode.parentNode as HTMLElement).style.display = 'none';
-        (K.gid('dataset-borders-show-during-play').parentNode.parentNode as HTMLElement).style.display = 'none';
+        (K.gid('dataset-borders-show-origin')!.parentNode!.parentNode as HTMLElement).style.display = 'none';
+        (K.gid('dataset-borders-show-during-play')!.parentNode!.parentNode as HTMLElement).style.display = 'none';
         if (tomni && tomni.cell) {
           removeDatasetBorders();
           removeDatasetOrigin();
@@ -585,7 +594,7 @@ if (LOCAL) {
         }
         clearInterval(intv);
         
-        K.gid('show-dataset-borders').style.display = state ? 'inline-block' : 'none';
+        K.gid('show-dataset-borders')!.style.display = state ? 'inline-block' : 'none';
       }, 100);
     }, 100);
   }
@@ -608,12 +617,12 @@ if (LOCAL) {
   $(document).on('cell-info-ready-triggered.utilities', toggleDatasetBordersVisibility);
 
   $(document).on('cube-enter-triggered.utilities', function () {
-    let settings = K.ls.get('settings');
-    let showInCube = false;
+    let settings: string[] | string | null = K.ls.get('settings');
+    let showInCube: string | boolean = false;
     
     if (settings) {
       settings = JSON.parse(settings);
-      showInCube = settings['dataset-borders-show-during-play'] === undefined ? true : settings['dataset-borders-show-during-play'];
+      showInCube = settings!['dataset-borders-show-during-play' as any] ?? true;
     }
     
     if (!showInCube) {
@@ -627,11 +636,11 @@ if (LOCAL) {
 
   $(document).on('cube-leave-triggered.utilities', function () {
     let settings = K.ls.get('settings');
-    let showInCube = false;
+    let showInCube: string | boolean = false;
 
     if (settings) {
       settings = JSON.parse(settings);
-      showInCube = settings['dataset-borders-show-during-play'] === undefined ? true : settings['dataset-borders-show-during-play'];
+      showInCube = settings!['dataset-borders-show-during-play' as any] ?? true;
     }
     
     // we only have to take care, when in-cube is turned off
@@ -655,8 +664,8 @@ if (LOCAL) {
     });
     
       // stop leaking of shortcuts from SL
-    $('#slPanel').on('keyup', '#sl-action-notes', function (evt) {
-      if (['g', 'G', 't', 'T', '0', '1', '2', '3', '4', '5', '6'].includes(evt.key)) {
+    $('#slPanel').on('keyup', '#sl-action-notes', function (evt: JQuery.Event) {
+      if (['g', 'G', 't', 'T', '0', '1', '2', '3', '4', '5', '6'].includes(evt.key!)) {
         evt.stopPropagation();
       }
     });
@@ -666,7 +675,7 @@ if (LOCAL) {
 
   function submitTask(): void {
     // simulate clicking on the Reap button
-    K.qS('#editActions .reaperButton').style.backgroundColor = '#6785c5';
+    K.qS('#editActions .reaperButton')!.style.backgroundColor = '#6785c5';
 
     tomni.taskManager.saveTask({
       status: 'finished', 
@@ -675,7 +684,7 @@ if (LOCAL) {
       always: function () { // TaskUI.toggleLoader from omni.js
         $('#normal-cube-loader').removeClass('onscreen');
         // bring back the Reap button to the normal state
-        K.qS('#editActions .reaperButton').style.backgroundColor = '#4f74c4';
+        K.qS('#editActions .reaperButton')!.style.backgroundColor = '#4f74c4';
       },
       fail: function () { // taskActionButtonsSetDisabled in TaskUI from omni.js
         $('#realActions button').prop('disabled', false);
@@ -705,8 +714,16 @@ if (LOCAL) {
       // voted
     });
   }
+
+  type CubeStatus = {
+    cell: number,
+    task: number,
+    reaped: boolean,
+    status?: string,
+    issue?: string
+  };
   
-  let cubeStatus;
+  let cubeStatus: CubeStatus;
 
   function createAdditionalSLButtons(): void {
     let html = `
@@ -728,13 +745,13 @@ if (LOCAL) {
     div.id = 'ewSLbuttonsWrapper';
     div.innerHTML = html;
 
-    K.gid('scoutsLogFloatingControls').appendChild(div);
+    K.gid('scoutsLogFloatingControls')!.appendChild(div);
 
-    K.gid('ewSLcomplete').style.color = Cell.ScytheVisionColors.complete2;
+    K.gid('ewSLcomplete')!.style.color = Cell.ScytheVisionColors.complete2;
 
-    K.gid('ewSLbuttonsWrapper').style.display = settings.getValue('show-sl-shortcuts') ? 'inline-block' : 'none';
+    K.gid('ewSLbuttonsWrapper')!.style.display = settings.getValue('show-sl-shortcuts') ? 'inline-block' : 'none';
 
-    $('#ewSLbuttonsWrapper').on('click', 'div > div', function () {
+    $('#ewSLbuttonsWrapper').on('click', 'div > div', function (evt: JQuery.ClickEvent) {
       let target = tomni.getTarget();
 
       if (!target) {
@@ -747,7 +764,7 @@ if (LOCAL) {
         reaped: true,
       };
 
-      switch(this.id)  {
+      switch(evt.target.id)  {
         case 'ewSLnub':
           cubeStatus.status = 'good';
           cubeStatus.issue = 'nub';
@@ -782,7 +799,7 @@ if (LOCAL) {
           break;
       }
 
-      if (this.id === 'ewSLcomplete') {
+      if (evt.target.id === 'ewSLcomplete') {
         complete();
       }
       else {
@@ -850,7 +867,7 @@ if (LOCAL) {
 
 
   // autorefresh show-me-me
-  $(document).on('websocket-task-completions', function (event, data) {
+  $(document).on('websocket-task-completions', function (_event: JQuery.Event, data: {uid: number}) {
     if (data.uid !== account.account.uid) {
       return;
     }
@@ -878,12 +895,12 @@ if (LOCAL) {
   // END:  autorefresh show-me-me
 
   // submit using Spacebar
-  $('body').on('keydown', function (evt) {
-    let btn: HTMLElement;
+  $('body').on('keydown', function (evt: JQuery.KeyDownEvent) {
+    let btn: HTMLElement | null;
     let submit = settings.getValue('submit-using-spacebar');
     let turnOffZoom = settings.getValue('turn-off-zoom-by-spacebar');
 
-    if (evt.keyCode === 32 && tomni.gameMode && (submit || turnOffZoom)) {
+    if (evt.key === ' ' && tomni.gameMode && (submit || turnOffZoom)) {
       evt.stopPropagation();
       
       if (turnOffZoom && !submit) {
@@ -923,7 +940,7 @@ if (LOCAL) {
     font = 'bold ' + size + 'px ' + font;
 
     let canvas = document.createElement('canvas');
-    let context = canvas.getContext('2d');
+    let context = canvas.getContext('2d')!;
     context.font = font;
 
     // get size data (height depends only on font size)
@@ -978,18 +995,43 @@ if (LOCAL) {
     fetch('/1.0/cell/' + tomni.cell + '/tasks')
       .then((response) => { return response.json(); })
       .then((json) => {
+        type Categorized = {
+          lowX: string[],
+          lowY: string[],
+          lowZ: string[],
+          highX: string[],
+          highY: string[],
+          highZ: string[]
+        };
+
         let children = tomni.task.children;
         let tasks = json.tasks;
-        let neighbours = tasks.filter((task) => { return children.indexOf(task.id) !== -1; });
+        let neighbours = tasks.filter((task: {id: string}) => { return children.indexOf(task.id) !== -1; });
         let cell = tomni.getCurrentCell();
         let voxels = cell.world.volumes.voxels;
-        let categorized = {lowX: [], lowY: [], lowZ: [], highX: [], highY: [], highZ: []};
+        let categorized: Categorized = {lowX: [], lowY: [], lowZ: [], highX: [], highY: [], highZ: []};
         let world = tomni.threeD.getWorld();
         let group = new THREE.Group();
         group.name = 'neighbours';
         let tb = tomni.task.bounds;
 
-        function categorizeEW(child) {
+        type Child = {
+          id: string,
+          bounds: {
+            min: {
+              x: number,
+              y: number,
+              z: number
+            },
+            max: {
+              x: number,
+              y: number,
+              z: number
+            }
+          }
+        }
+
+        function categorizeEW(child: Child) {
           let shift = 30;
 
           let cb = child.bounds;
@@ -1019,7 +1061,7 @@ if (LOCAL) {
           }
         }
 
-        function categorizeZF(child) {
+        function categorizeZF(child: Child) {
           let shift = 500;
 
           let cb = child.bounds;
@@ -1072,7 +1114,7 @@ if (LOCAL) {
     return [(x - rect.left) / rect.width, (y - rect.top) / rect.height];
   };
 
-  let getIntersects = function (point, objects) {
+  let getIntersects = function (point: {x: number, y: number}, objects: {}) {
     mouse.set((point.x * 2) - 1, - (point.y * 2) + 1);
     raycaster.setFromCamera(mouse, camera);
     return raycaster.intersectObjects(objects);
@@ -1092,7 +1134,7 @@ if (LOCAL) {
     }
 
     let world = tomni.threeD.getWorld();
-    let container = document.getElementById('threeD');
+    let container = document.getElementById('threeD')!;
     let array = getMousePosition(container, event.clientX, event.clientY);
     onClickPosition.fromArray(array);
     let neighbours = world.getObjectByName('neighbours');
@@ -1161,7 +1203,7 @@ if (LOCAL) {
     document.body.removeChild(textArea);
   }
 
-  $(document).on('click', function (event) {
+  $(document).on('click', function (event: JQuery.ClickEvent) {
     if (!settings || !settings.getValue('show-childrens-ids')) {
       return;
     }
@@ -1171,7 +1213,7 @@ if (LOCAL) {
     }
 
     let world = tomni.threeD.getWorld();
-    let container = document.getElementById('threeD');
+    let container = document.getElementById('threeD')!;
     let array = getMousePosition(container, event.clientX, event.clientY);
     onClickPosition.fromArray(array);
     let neighbours = world.getObjectByName('neighbours');
@@ -1214,7 +1256,7 @@ if (LOCAL) {
   }
   
   
-  function switchSLButtons(state: boolean): void {
+  function switchSLButtons(state: string | boolean | undefined): void {
     if (state) {
       $('#settingsButton').before($('#scoutsLogButton'));
     }
@@ -1224,8 +1266,11 @@ if (LOCAL) {
   }
 
   function parseTransform(t: string) {
-    let e: Array<any> = t.match(/([0-9\.]+)/g),
-      a = {
+    let e: RegExpMatchArray | number[] | null = t.match(/([0-9\.]+)/g);
+    if (e === null) return;
+    e = e.map((el) => parseInt(el, 10));
+
+    let a = {
         x: e[4],
         y: e[5]
       },
@@ -1273,13 +1318,15 @@ if (LOCAL) {
     };
   }
 
+  type File = Array<{data: string | ArrayBuffer, type: string, name: string, filename: string}>;
+
   // source: omni.js
-  function fileRequest(url: string, data: object, file: object, callback: (response?: {}) => {} | void): void {
+  function fileRequest(url: string, data: string[] | {data: string }, file: File, callback: (response?: {}) => {} | void): void {
     let form = new FormData();
     if (data) {
       for (let i in data) {
         if (data.hasOwnProperty(i)) {
-          form.append(i, data[i]);
+          form.append(i, data[i as keyof typeof data]);
         }
       }
     }
@@ -1353,7 +1400,7 @@ if (LOCAL) {
     let scr = document.createElement('canvas');
     scr.height = threeDCanvas.height;
     scr.width = threeDCanvas.width;
-    let scrCtx = scr.getContext('2d');
+    let scrCtx = scr.getContext('2d')!;
 
     scrCtx.imageSmoothingEnabled = false;
     scrCtx.beginPath();
@@ -1367,7 +1414,7 @@ if (LOCAL) {
       minX = Math.floor((threeDCanvas.width - twoDParent.clientWidth) / 2),
       maxX = Math.floor(threeDCanvas.width / 2);
     scrCtx.drawImage(threeDCanvas, minX, 0, maxX, threeDCanvas.height, 0, 0, maxX, threeDCanvas.height);
-    let g = parseTransform($(twoDCanvas).css('transform')),
+    let g = parseTransform($(twoDCanvas).css('transform'))!,
       m = parseFloat($(twoDCanvas).css('left')),
       p = -1 * parseFloat($(twoDCanvas).css('bottom')),
       h = {
@@ -1460,7 +1507,7 @@ if (LOCAL) {
 
 // source: https://stackoverflow.com/a/30893294
 function switchReapMode(logAndReap: boolean): void {
-  let reapButton: { [key: string]: any } = K.gid('saveGT');
+  let reapButton: { [key: string]: any } = K.gid('saveGT')!;
 
 
   if (logAndReap) {
@@ -1510,8 +1557,8 @@ function compactInspectorPanel(compacted: boolean): void {
     $('#cubeInspectorFloatingControls .controls .showmeme .parents, #cubeInspectorFloatingControls .controls .inspect .parents').css({
       'margin-top': 2
     });
-    $('.flat, .flat:active, .flat:hover').each(function () {
-      this.style.setProperty('border-radius', '8px', 'important');
+    $('.flat, .flat:active, .flat:hover').each(function (_i: number, e: HTMLElement) {
+      e.style.setProperty('border-radius', '8px', 'important');
     });
     $('#ews-current-color-indicator').css({
       top: 40,
@@ -1542,8 +1589,8 @@ function compactInspectorPanel(compacted: boolean): void {
     $('#cubeInspectorFloatingControls .controls .showmeme .parents, #cubeInspectorFloatingControls .controls .inspect .parents').css({
       'margin-top': 'auto'
     });
-    $('.flat, .flat:active, .flat:hover').each(function () {
-      this.style.setProperty('border-radius', '999px', 'important');
+    $('.flat, .flat:active, .flat:hover').each(function (i: number, e: HTMLElement) {
+      e.style.setProperty('border-radius', '999px', 'important');
     });
     $('#ews-current-color-indicator').css({
       top: 56,
@@ -1553,7 +1600,7 @@ function compactInspectorPanel(compacted: boolean): void {
 }
 
 
-  $(document).on('ews-setting-changed', function (evt, data) {
+  $(document).on('ews-setting-changed', function (_evt: JQuery.Event, data: {setting: string, state: boolean}) {
     switch (data.setting) {
       case 'hide-blog':
       case 'hide-about':
@@ -1606,7 +1653,7 @@ function compactInspectorPanel(compacted: boolean): void {
         break;
       case 'show-sl-shortcuts':
         if (K.gid('ewSLbuttonsWrapper')) {
-          K.gid('ewSLbuttonsWrapper').style.display = data.state ? 'inline-block' : 'none';
+          K.gid('ewSLbuttonsWrapper')!.style.display = data.state ? 'inline-block' : 'none';
         }
         break;
       case 'log-and-reap':
@@ -1619,25 +1666,24 @@ function compactInspectorPanel(compacted: boolean): void {
   });
 
 
-  let settings;
+  let settings: Settings;
   let accordionApplied = false;
 
   function main() {
-      
     if (!K.ls.get('utilities-settings-2018-03-27-update')) {
       let props = K.ls.get('settings');
       if (props) {
-        props = JSON.parse(props);
-        Object.keys(props).forEach(function (key, index) {
-          if (key.indexOf('ews-') === 0) {
-            K.ls.set(key.slice(4), props[key]);
-          }
-          else if (key.indexOf('ew-') === 0) {
-            K.ls.set(key.slice(3), props[key]);
-          }
-          else {
-            K.ls.set(key, props[key]);
-          }
+        let propes = JSON.parse(props);
+        Object.keys(props).forEach(function (key) {
+            if (key.indexOf('ews-') === 0) {
+              K.ls.set(key.slice(4), propes[key]);
+            }
+            else if (key.indexOf('ew-') === 0) {
+              K.ls.set(key.slice(3), propes[key]);
+            }
+            else {
+              K.ls.set(key, propes[key]);
+            }
         });
         K.ls.remove('settings');
       }
@@ -1667,7 +1713,7 @@ function compactInspectorPanel(compacted: boolean): void {
       `);
 
       
-    settings =  new Settings();
+    settings = new (Settings as any)();
     settings.addCategory();
 
     if (account.can('scout scythe mystics admin')) {
@@ -1841,7 +1887,7 @@ function compactInspectorPanel(compacted: boolean): void {
     let popupStatus = 'closed';
     
     $('#ews-additional-options').on('click', function () {
-      let popup = K.gid('ews-additional-options-popup');
+      let popup = K.gid('ews-additional-options-popup')!;
       popup.style.display = 'block';
 
       let windowWidth = $(window).width();
@@ -1855,15 +1901,15 @@ function compactInspectorPanel(compacted: boolean): void {
       popupStatus = 'opened';
     });
     
-    $(document).on('click', function (evt) {
+    $(document).on('click', function (evt: JQuery.ClickEvent) {
       if ((evt.target as unknown as HTMLElement).id !== 'ews-additional-options-popup' && popupStatus === 'opened') {
-        K.gid('ews-additional-options-popup').style.display = 'none';
+        K.gid('ews-additional-options-popup')!.style.display = 'none';
         popupStatus = 'closed';
       }
     });
 
     if (account.can('scout scythe mystic admin')) {
-      $(document).on('keyup', function (evt) {
+      $(document).on('keyup', function (evt: JQuery.KeyUpEvent) {
         if (evt.key !== 'g' && evt.key !== 'G') {
           return;
         }
@@ -1899,7 +1945,7 @@ function compactInspectorPanel(compacted: boolean): void {
 
   }
 
-  $(document).on('cube-submission-data', function (evt, data) {
+  $(document).on('cube-submission-data', function (_evt: JQuery.Event, data: {special: string, task_id: number}) {
     if (settings.getValue('auto-complete') && data.special === 'scythed') {
       complete(data.task_id);
     }
@@ -1916,23 +1962,23 @@ function compactInspectorPanel(compacted: boolean): void {
       
       let parent = K.qS('.sl-setting-group');
       if (parent) {
-        parent.insertBefore(K.gid('compact-scouts-log-wrapper'), null);
-        parent.insertBefore(K.gid('show-sl-shortcuts-wrapper'), null);
-        parent.insertBefore(K.gid('log-and-reap-wrapper'), null);
+        parent.insertBefore(K.gid('compact-scouts-log-wrapper')!, null);
+        parent.insertBefore(K.gid('show-sl-shortcuts-wrapper')!, null);
+        parent.insertBefore(K.gid('log-and-reap-wrapper')!, null);
       }
 
 
-      $('.settings-group, .sl-setting-group').each(function () {
-        $(this).children().first().unwrap();
+      $('.settings-group, .sl-setting-group').each(function (_index: number, element: HTMLElement) {
+        $(element).children().first().unwrap();
       });
 
-      K.qSa('#settingsMenu h1').forEach(function (el) {
+      K.qSa('#settingsMenu h1').forEach(function (el: HTMLElement) {
         let newElement = document.createElement('div');
-        el.parentNode.insertBefore(newElement, el.nextElementSibling);
-        let cursor = el.nextElementSibling.nextElementSibling;
+        el.parentNode!.insertBefore(newElement, el.nextElementSibling);
+        let cursor = el.nextElementSibling!.nextElementSibling;
         while (cursor && cursor.tagName === 'DIV') {
           newElement.appendChild(cursor);
-          cursor = el.nextElementSibling.nextElementSibling; // previous element from this position was moved, so the same path will guide to the next el
+          cursor = el.nextElementSibling!.nextElementSibling; // previous element from this position was moved, so the same path will guide to the next el
         }
       });
 
@@ -1941,8 +1987,8 @@ function compactInspectorPanel(compacted: boolean): void {
         heightStyle: 'content'
       });
 
-      let trackerWindowSliderTitle = K.gid('activityTrackerWindowSlider').previousElementSibling;
-      (trackerWindowSliderTitle as HTMLElement).style.marginLeft = '30px';
+      let trackerWindowSliderTitle = K.gid('activityTrackerWindowSlider')!.previousElementSibling as HTMLElement;
+      trackerWindowSliderTitle.style.marginLeft = '30px';
       trackerWindowSliderTitle.innerHTML = 'Visible cubes';
 
       parent = trackerWindowSliderTitle.parentNode as HTMLElement;
@@ -1952,9 +1998,9 @@ function compactInspectorPanel(compacted: boolean): void {
       newTitle.innerHTML = 'Activity Tracker';
       newTitle.style.fontWeight = '800';
       newTitle.style.marginBottom = '15px';
-      trackerWindowSliderTitle.parentElement.insertBefore(newTitle, trackerWindowSliderTitle);
+      trackerWindowSliderTitle.parentElement!.insertBefore(newTitle, trackerWindowSliderTitle);
       
-      let trackerJumpSettingTitle = K.gid('atOverviewJumpSetting');
+      let trackerJumpSettingTitle = K.gid('atOverviewJumpSetting') as HTMLElement;
       trackerJumpSettingTitle.style.display = 'block';
       trackerJumpSettingTitle.style.paddingRight = '0';
       let span = trackerJumpSettingTitle.getElementsByTagName('span')[0];
@@ -1962,7 +2008,7 @@ function compactInspectorPanel(compacted: boolean): void {
       span.style.marginRight = '65px';
       span.innerHTML = 'Jump to:';
 
-      let slider = K.qS('#atOverviewJumpSetting div.checkbox');
+      let slider = K.qS('#atOverviewJumpSetting div.checkbox') as HTMLElement;
       slider.style.display = 'inline-block';
       slider.style.float = 'none';
       slider.style.verticalAlign = 'bottom';
@@ -1972,36 +2018,36 @@ function compactInspectorPanel(compacted: boolean): void {
       let before = document.createElement('span');
       before.style.fontSize = '9px';
       before.innerHTML = 'In Cube';
-      slider.parentElement.insertBefore(before, slider);
+      slider.parentElement!.insertBefore(before, slider);
 
       let after = document.createElement('span');
       after.style.fontSize = '9px';
       after.style.marginRight = '15px';
       after.innerHTML = 'Overview';
-      slider.parentElement.insertBefore(after, slider.nextSibling);
+      slider.parentElement!.insertBefore(after, slider.nextSibling);
 
       
-      let el = K.gid('chatVolumeSlider').parentElement;
-      parent = el.parentElement.parentElement;
+      let el = K.gid('chatVolumeSlider')!.parentElement as HTMLElement;
+      parent = el.parentElement!.parentElement as HTMLElement;
       parent.insertBefore(el, parent.firstChild);
-      parent.insertBefore(K.gid('sfxVolumeSlider').parentElement, parent.firstChild);
-      parent.insertBefore(K.gid('musicVolumeSlider').parentElement, parent.firstChild);
+      parent.insertBefore(K.gid('sfxVolumeSlider')!.parentElement!, parent.firstChild);
+      parent.insertBefore(K.gid('musicVolumeSlider')!.parentElement!, parent.firstChild);
 
-      let sliderParent = K.gid('activityTrackerWindowSlider').parentElement.parentElement;
+      let sliderParent = K.gid('activityTrackerWindowSlider')!.parentElement!.parentElement;
 
-      parent.insertBefore(K.gid('planeSlider').parentElement, sliderParent);
+      parent.insertBefore(K.gid('planeSlider')!.parentElement!, sliderParent);
 
-      el = K.gid('em3d').parentElement.parentElement;
+      el = K.gid('em3d')!.parentElement!.parentElement!;
       el.getElementsByTagName('span')[0].innerHTML = 'EM Images in 3D';
       el.style.marginTop = '-5px';
       parent.insertBefore(el, sliderParent);
 
       $('#colorSlider').parent().unwrap();
 
-      K.gid('heatmaplegendspref').parentElement.parentElement.getElementsByTagName('span')[0].innerHTML = 'Heatmap Legend';
-      K.gid('downsampleAmount').parentElement.parentElement.getElementsByTagName('span')[0].innerHTML = '3D Smoothing (ZFish)';
+      K.gid('heatmaplegendspref')!.parentElement!.parentElement!.getElementsByTagName('span')[0].innerHTML = 'Heatmap Legend';
+      K.gid('downsampleAmount')!.parentElement!.parentElement!.getElementsByTagName('span')[0].innerHTML = '3D Smoothing (ZFish)';
 
-      let preloadCubes = K.gid('preloadCubes').parentElement.parentElement;
+      let preloadCubes = K.gid('preloadCubes')!.parentElement!.parentElement as HTMLElement;
       preloadCubes.style.display = 'block';
 
       let preloadCubesTitle = preloadCubes.getElementsByTagName('span')[0];
@@ -2013,14 +2059,14 @@ function compactInspectorPanel(compacted: boolean): void {
       newTitle.innerHTML = 'Experimental Features';
       newTitle.style.fontWeight = '800';
       newTitle.style.marginBottom = '15px';
-      preloadCubesTitle.parentElement.insertBefore(newTitle, preloadCubesTitle);
+      preloadCubesTitle!.parentElement!.insertBefore(newTitle, preloadCubesTitle);
 
-      let experimentalFeaturesTitle = K.gid('experimentalFeatures').parentElement.parentElement.getElementsByTagName('span')[0];
+      let experimentalFeaturesTitle = K.gid('experimentalFeatures')!.parentElement!.parentElement!.getElementsByTagName('span')[0];
       experimentalFeaturesTitle.style.display = 'inline-block';
       experimentalFeaturesTitle.style.marginLeft = '30px';
       experimentalFeaturesTitle.innerHTML = 'Enable 3D select (f key)';
 
-      let playerActivityIcons = K.gid('playerActivityIcons').parentElement.parentElement;
+      let playerActivityIcons = K.gid('playerActivityIcons')!.parentElement!.parentElement as HTMLElement;
       playerActivityIcons.style.display = 'block';
 
       let playerActivityIconsTitle = playerActivityIcons.getElementsByTagName('span')[0];
@@ -2031,13 +2077,13 @@ function compactInspectorPanel(compacted: boolean): void {
       newTitle.innerHTML = 'Live Overview';
       newTitle.style.fontWeight = '800';
       newTitle.style.marginBottom = '15px';
-      playerActivityIconsTitle.parentElement.insertBefore(newTitle, playerActivityIconsTitle);
+      playerActivityIconsTitle!.parentElement!.insertBefore(newTitle, playerActivityIconsTitle);
 
-      let playerAnonActivityIconsTitle = K.gid('playerAnonActivityIcons').parentElement.parentElement.getElementsByTagName('span')[0];
+      let playerAnonActivityIconsTitle = K.gid('playerAnonActivityIcons')!.parentElement!.parentElement!.getElementsByTagName('span')[0];
       playerAnonActivityIconsTitle.style.display = 'inline-block';
       playerAnonActivityIconsTitle.style.marginLeft = '30px';
 
-      let outlineGlowSliderTitle = K.gid('outlineGlowSlider').parentElement.getElementsByTagName('span')[0];
+      let outlineGlowSliderTitle = K.gid('outlineGlowSlider')!.parentElement!.getElementsByTagName('span')[0];
       outlineGlowSliderTitle.style.display = 'inline-block';
       outlineGlowSliderTitle.style.marginLeft = '30px';
     }
@@ -2045,7 +2091,34 @@ function compactInspectorPanel(compacted: boolean): void {
 
   
 
-  let cameraProps, tomniRotation, threeDZoom;
+  // let cameraProps, tomniRotation, threeDZoom;
+
+  let tomniRotation: {
+    x: number,
+    y: number,
+    z: number
+  };
+
+  let threeDZoom: {tomni: {threeD: {zoom: number}}};
+
+  let cameraProps: {
+    position: {
+      x: number,
+      y: number,
+      z: number
+    },
+    rotation: {
+      x: number,
+      y: number,
+      z: number
+    },
+    up: {
+      x: number,
+      y: number,
+      z: number
+    },
+    fov: number
+  };
 
   function save() {
     if (!settings.getValue('dont-rotate-ov-while-in-cube')) {
@@ -2106,7 +2179,7 @@ function compactInspectorPanel(compacted: boolean): void {
   let isZKeyPressed = false;
 
   $(document)
-    .on('keydown', function (e) {
+    .on('keydown', function (e: JQuery.KeyDownEvent) {
       if (!tomni.task || !tomni.task.inspect) {
         return;
       }
@@ -2114,11 +2187,11 @@ function compactInspectorPanel(compacted: boolean): void {
       if (e.key == 'Z' || e.key == 'z') {
         isZKeyPressed = true;
         if (settings.getValue('ranged-remove')) {
-          K.gid('threeDCanvas').style.setProperty('cursor', getComputedStyle(document.getElementById('twoD')).cursor  , 'important');
+          K.gid('threeDCanvas')!.style.setProperty('cursor', getComputedStyle(document.getElementById('twoD')!).cursor  , 'important');
         }
       }
     })
-    .on('keyup', function (e) {
+    .on('keyup', function (e: JQuery.KeyUpEvent) {
       if (!tomni.task || !tomni.task.inspect) {
         return;
       }
@@ -2126,7 +2199,7 @@ function compactInspectorPanel(compacted: boolean): void {
       if (e.key == 'Z' || e.key == 'z') {
         isZKeyPressed = false;
         if (settings.getValue('ranged-remove')) {
-          K.gid('threeDCanvas').style.setProperty('cursor', 'pointer', 'important');
+          K.gid('threeDCanvas')!.style.setProperty('cursor', 'pointer', 'important');
         }
       }
     });
@@ -2139,7 +2212,7 @@ function compactInspectorPanel(compacted: boolean): void {
     4: 100
   };
 
-  $('#threeDCanvas').on('contextmenu', function (e) {
+  $('#threeDCanvas').on('contextmenu', function (e: JQuery.ContextMenuEvent) {
     if (!tomni.task || !tomni.task.inspect) {
       return;
     }
@@ -2147,7 +2220,8 @@ function compactInspectorPanel(compacted: boolean): void {
     let brushSize = 1;
 
     if (settings.getValue('ranged-remove')) {
-      brushSize = Math.ceil(diameters[tomni.prefs.get('brush_size')] / 2);
+      let size: keyof typeof diameters = tomni.prefs.get('brush_size');
+      brushSize = Math.ceil(diameters[size] / 2);
     }
 
     if (isZKeyPressed && settings.getValue('piercing-remove')) {

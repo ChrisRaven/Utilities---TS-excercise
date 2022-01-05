@@ -124,7 +124,7 @@ if (LOCAL) {
             }
             $(`#${settings.id}-wrapper`).on('click', function (evt) {
                 evt.stopPropagation();
-                let $elem = $(this).find('input');
+                let $elem = $(evt.target).find('input');
                 let elem = $elem[0];
                 let newState = !elem.checked;
                 K.ls.set(settings.id, newState);
@@ -492,7 +492,7 @@ if (LOCAL) {
         let showInCube = false;
         if (settings) {
             settings = JSON.parse(settings);
-            showInCube = settings['dataset-borders-show-during-play'] === undefined ? true : settings['dataset-borders-show-during-play'];
+            showInCube = settings['dataset-borders-show-during-play'] ?? true;
         }
         if (!showInCube) {
             removeDatasetBorders();
@@ -506,7 +506,7 @@ if (LOCAL) {
         let showInCube = false;
         if (settings) {
             settings = JSON.parse(settings);
-            showInCube = settings['dataset-borders-show-during-play'] === undefined ? true : settings['dataset-borders-show-during-play'];
+            showInCube = settings['dataset-borders-show-during-play'] ?? true;
         }
         // we only have to take care, when in-cube is turned off
         if (!showInCube) {
@@ -588,7 +588,7 @@ if (LOCAL) {
         K.gid('scoutsLogFloatingControls').appendChild(div);
         K.gid('ewSLcomplete').style.color = Cell.ScytheVisionColors.complete2;
         K.gid('ewSLbuttonsWrapper').style.display = settings.getValue('show-sl-shortcuts') ? 'inline-block' : 'none';
-        $('#ewSLbuttonsWrapper').on('click', 'div > div', function () {
+        $('#ewSLbuttonsWrapper').on('click', 'div > div', function (evt) {
             let target = tomni.getTarget();
             if (!target) {
                 return;
@@ -598,7 +598,7 @@ if (LOCAL) {
                 task: target[0].id,
                 reaped: true,
             };
-            switch (this.id) {
+            switch (evt.target.id) {
                 case 'ewSLnub':
                     cubeStatus.status = 'good';
                     cubeStatus.issue = 'nub';
@@ -632,7 +632,7 @@ if (LOCAL) {
                     cubeStatus.issue = 'wrong-seed';
                     break;
             }
-            if (this.id === 'ewSLcomplete') {
+            if (evt.target.id === 'ewSLcomplete') {
                 complete();
             }
             else {
@@ -683,7 +683,7 @@ if (LOCAL) {
         createAdditionalSLButtons();
     }, 50);
     // autorefresh show-me-me
-    $(document).on('websocket-task-completions', function (event, data) {
+    $(document).on('websocket-task-completions', function (_event, data) {
         if (data.uid !== account.account.uid) {
             return;
         }
@@ -709,7 +709,7 @@ if (LOCAL) {
         let btn;
         let submit = settings.getValue('submit-using-spacebar');
         let turnOffZoom = settings.getValue('turn-off-zoom-by-spacebar');
-        if (evt.keyCode === 32 && tomni.gameMode && (submit || turnOffZoom)) {
+        if (evt.key === ' ' && tomni.gameMode && (submit || turnOffZoom)) {
             evt.stopPropagation();
             if (turnOffZoom && !submit) {
                 return;
@@ -988,7 +988,11 @@ if (LOCAL) {
         }
     }
     function parseTransform(t) {
-        let e = t.match(/([0-9\.]+)/g), a = {
+        let e = t.match(/([0-9\.]+)/g);
+        if (e === null)
+            return;
+        e = e.map((el) => parseInt(el, 10));
+        let a = {
             x: e[4],
             y: e[5]
         }, s = 0, n = {
@@ -1231,8 +1235,8 @@ if (LOCAL) {
             $('#cubeInspectorFloatingControls .controls .showmeme .parents, #cubeInspectorFloatingControls .controls .inspect .parents').css({
                 'margin-top': 2
             });
-            $('.flat, .flat:active, .flat:hover').each(function () {
-                this.style.setProperty('border-radius', '8px', 'important');
+            $('.flat, .flat:active, .flat:hover').each(function (_i, e) {
+                e.style.setProperty('border-radius', '8px', 'important');
             });
             $('#ews-current-color-indicator').css({
                 top: 40,
@@ -1263,8 +1267,8 @@ if (LOCAL) {
             $('#cubeInspectorFloatingControls .controls .showmeme .parents, #cubeInspectorFloatingControls .controls .inspect .parents').css({
                 'margin-top': 'auto'
             });
-            $('.flat, .flat:active, .flat:hover').each(function () {
-                this.style.setProperty('border-radius', '999px', 'important');
+            $('.flat, .flat:active, .flat:hover').each(function (i, e) {
+                e.style.setProperty('border-radius', '999px', 'important');
             });
             $('#ews-current-color-indicator').css({
                 top: 56,
@@ -1272,7 +1276,7 @@ if (LOCAL) {
             });
         }
     }
-    $(document).on('ews-setting-changed', function (evt, data) {
+    $(document).on('ews-setting-changed', function (_evt, data) {
         switch (data.setting) {
             case 'hide-blog':
             case 'hide-about':
@@ -1342,16 +1346,16 @@ if (LOCAL) {
         if (!K.ls.get('utilities-settings-2018-03-27-update')) {
             let props = K.ls.get('settings');
             if (props) {
-                props = JSON.parse(props);
-                Object.keys(props).forEach(function (key, index) {
+                let propes = JSON.parse(props);
+                Object.keys(props).forEach(function (key) {
                     if (key.indexOf('ews-') === 0) {
-                        K.ls.set(key.slice(4), props[key]);
+                        K.ls.set(key.slice(4), propes[key]);
                     }
                     else if (key.indexOf('ew-') === 0) {
-                        K.ls.set(key.slice(3), props[key]);
+                        K.ls.set(key.slice(3), propes[key]);
                     }
                     else {
-                        K.ls.set(key, props[key]);
+                        K.ls.set(key, propes[key]);
                     }
                 });
                 K.ls.remove('settings');
@@ -1568,7 +1572,7 @@ if (LOCAL) {
             });
         }
     }
-    $(document).on('cube-submission-data', function (evt, data) {
+    $(document).on('cube-submission-data', function (_evt, data) {
         if (settings.getValue('auto-complete') && data.special === 'scythed') {
             complete(data.task_id);
         }
@@ -1585,8 +1589,8 @@ if (LOCAL) {
                 parent.insertBefore(K.gid('show-sl-shortcuts-wrapper'), null);
                 parent.insertBefore(K.gid('log-and-reap-wrapper'), null);
             }
-            $('.settings-group, .sl-setting-group').each(function () {
-                $(this).children().first().unwrap();
+            $('.settings-group, .sl-setting-group').each(function (_index, element) {
+                $(element).children().first().unwrap();
             });
             K.qSa('#settingsMenu h1').forEach(function (el) {
                 let newElement = document.createElement('div');
@@ -1680,7 +1684,10 @@ if (LOCAL) {
             outlineGlowSliderTitle.style.marginLeft = '30px';
         }
     });
-    let cameraProps, tomniRotation, threeDZoom;
+    // let cameraProps, tomniRotation, threeDZoom;
+    let tomniRotation;
+    let threeDZoom;
+    let cameraProps;
     function save() {
         if (!settings.getValue('dont-rotate-ov-while-in-cube')) {
             return;
@@ -1764,7 +1771,8 @@ if (LOCAL) {
         }
         let brushSize = 1;
         if (settings.getValue('ranged-remove')) {
-            brushSize = Math.ceil(diameters[tomni.prefs.get('brush_size')] / 2);
+            let size = tomni.prefs.get('brush_size');
+            brushSize = Math.ceil(diameters[size] / 2);
         }
         if (isZKeyPressed && settings.getValue('piercing-remove')) {
             let offset = Utils.UI.eventOffset($('#threeDCanvas'), e);
